@@ -1,24 +1,8 @@
 const { contextBridge, ipcRenderer } = require('electron')
 console.log("init preloads.js")
-// Expose ipcRenderer to the renderer process
-// ipcMain.handle('get-config', (event, { key }) => {
-//   return config_hander.getConfig(key);
-// });
-
-// ipcMain.on('set-config', (event, { key, value }) => {
-//   config_hander.updateConfig(key, value);
-// });
-
-
-// ipcMain.on('save-config',(  event, ) => {
-//   config_hander.save();
-// })
 
 contextBridge.exposeInMainWorld('electronAPI', {
   ipcRenderer: ipcRenderer,
-  executeCommand: async (commands) => {
-    return await ipcRenderer.invoke('execute-command', commands)
-  },
   onCommandOutput: (callback) => {
     ipcRenderer.on('command-output', (event, output) => {
       callback(output);
@@ -29,17 +13,16 @@ contextBridge.exposeInMainWorld('electronAPI', {
       callback(exitCode);
     });
   },
-  getConfig: async (key) => {
-    return await ipcRenderer.invoke('get-config', key)
+  executeCommand: (command, cwd) => {
+    ipcRenderer.invoke('execute-command', { command, cwd });
   },
-  setConfig: async (key, value) => {
-    await ipcRenderer.invoke('set-config', { key, value })
+  executeGPT: () => {
+    console.log("executeGPT in render")
+    ipcRenderer.invoke('execute-gpt',{});
   },
-  saveConfig: async () => {
-    await ipcRenderer.invoke('save-config')
+  updateValues: (values) => {
+    ipcRenderer.send('update-values', { values });
   }
-
-
 })
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {

@@ -13,7 +13,7 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["src"],
+  "include": ["src", "electron/main/api.ts"],
   "references": [
     { "path": "./tsconfig.node.json" }
   ]

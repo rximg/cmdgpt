@@ -6,7 +6,7 @@ export class ConfigHandler {
     private store: { apiKey: string };
   
     constructor() {
-      this.configFilePath = `${os.homedir()}/.himachine`;
+      this.configFilePath = `${os.homedir()}/.hirobot`;
       if (fs.existsSync(this.configFilePath)) {
         this.store = JSON.parse(fs.readFileSync(this.configFilePath).toString());
       } else {

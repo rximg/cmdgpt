@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { onMounted,onUpdated,ref  } from 'vue';
-import {  Model } from '../api'
-
+import {  Model } from '../model'
+//TODO 可编辑路径。
 // const model: Model = useModel("main")
-const apikey = window.electronAPI.getConfig('apiKey')
-const model = new Model(
-  window,
-  apikey,)
+// const apikey = window.electronAPI.getConfig('apiKey')
+const model = new Model(window)
 
 const execute_command = () => {
   model.execute_command()
 }
-const execute_openai_api = () => {
-  model.execute_openai_api()
+const execute_gpt = () => {
+  console.log("execute_gpt")
+  model.execute_gpt()
 }
 const consoleRef = ref<HTMLDivElement | null>(null);
 
@@ -36,7 +35,7 @@ onMounted(() => {
     <div class="margin">CurrentDir:{{ model.current_dir }}</div>
     <a-input-group  class="margin" compact>
       <a-input v-model:value="model.prompt.value" placeholder="input prompt..." style="width: 80%" />
-      <a-button @click="execute_openai_api">Chat</a-button>
+      <a-button @click="execute_gpt">Chat</a-button>
     </a-input-group>
 
     <a-input-group  class="margin" compact>

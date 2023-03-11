@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { spawn } from 'node:child_process'
 import * as iconv from 'iconv-lite'
 import {ConfigHandler} from './config'
+import {Model} from './api'
 // The built directory structure
 //
 // ├─┬ dist-electron
@@ -30,7 +31,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
-const config_hander = new ConfigHandler()
+// const config_hander = new ConfigHandler()
 // Remove electron security warnings
 // This warning only shows in development mode
 // Read more on https://www.electronjs.org/docs/latest/tutorial/security
@@ -76,53 +77,48 @@ async function createWindow() {
   })
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
+const config_hander =  new ConfigHandler()
+const model = new Model(
+  config_hander.getConfig('apiKey')
+)
+app.whenReady().then(
+  ()=>{
+    createWindow()
 
-app.whenReady().then(createWindow)
+    
+  })
+
+
 
 ipcMain.handle('execute-command', (event, { command, cwd }) => {
-  process.chdir(cwd);
+  console.log('execute-gpt in main')
 
-  const ls = spawn(command, [], { shell: true });
-  let buffer = '';
-  ls.stdout.on('data', (data) => {
-    buffer += iconv.decode(data, 'gbk');
-    const lines = buffer.split('\n');
-    buffer = lines.pop();
-    for (const line of lines) {
-      event.sender.send('command-output', line);
-      // console.log(line);
-    }
-  });
-  ls.stderr.on('data', (data) => {
-    buffer += iconv.decode(data, 'gbk');
-    const lines = buffer.split('\n');
-    buffer = lines.pop();
-    for (const line of lines) {
-      event.sender.send('command-output', line);
-      // console.log(line);
-    }
-  });
-  ls.on('close', (code) => {
-    if (buffer) {
-      event.sender.send('command-output', buffer);
-      console.log(buffer);
-    }
-    event.sender.send('command-exit', code);
-  });
+  model.execute_command(event,command, cwd)
 });
 
-ipcMain.handle('get-config', (event, { key }) => {
-  return config_hander.getConfig(key);
+ipcMain.handle('execute-gpt', async (event,) => {
+  // model.execute_command(event,command, cwd)
+  console.log('execute-gpt in main')
+  return await model.execute_gpt()
 });
 
-ipcMain.on('set-config', (event, { key, value }) => {
-  config_hander.updateConfig(key, value);
+ipcMain.on('update-values', (event, { values }) => {
+  model.update_values(values)
 });
 
 
-ipcMain.on('save-config',(  event, ) => {
-  config_hander.save();
-})
+// ipcMain.handle('get-config', (event, { key }) => {
+//   return config_hander.getConfig(key);
+// });
+
+// ipcMain.on('set-config', (event, { key, value }) => {
+//   config_hander.updateConfig(key, value);
+// });
+
+
+// ipcMain.on('save-config',(  event, ) => {
+//   config_hander.save();
+// })
 
 
 
