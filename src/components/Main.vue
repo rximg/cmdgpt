@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { onMounted,onUpdated,ref  } from 'vue';
-import {  Model } from '../model'
+import { onMounted, onUpdated, ref, Ref, computed, reactive, watch } from 'vue';
+import { Model } from '../model'
+import { DownOutlined, FormOutlined,RetweetOutlined } from '@ant-design/icons-vue';
+import FileEdit from './FileEdit.vue'
 //TODO 可编辑路径。
 // const model: Model = useModel("main")
 // const apikey = window.electronAPI.getConfig('apiKey')
@@ -10,9 +12,14 @@ const execute_command = () => {
   model.execute_command()
 }
 const execute_gpt = () => {
-  console.log("execute_gpt")
-  model.execute_gpt()
+  console.log('prompt',model.prompt.value)
+  const data = model.execute_gpt().then((data)=>{
+    console.log('get gpt',data)
+  })
+  // console.log('get gpt',data)
 }
+
+
 const consoleRef = ref<HTMLDivElement | null>(null);
 
 onUpdated(() => {
@@ -21,24 +28,27 @@ onUpdated(() => {
     consoleRef.value.scrollTop = consoleRef.value.scrollHeight;
   }
 });
-// mounted(){
-  // model.register_signals()
-// }
+
+
 onMounted(() => {
   model.register_signals()
 })
+
 
 </script>
 
 <template>
   <div>
-    <div class="margin">CurrentDir:{{ model.current_dir }}</div>
-    <a-input-group  class="margin" compact>
+
+  
+    <FileEdit :model="model" />
+
+    <a-input-group class="margin" compact>
       <a-input v-model:value="model.prompt.value" placeholder="input prompt..." style="width: 80%" />
       <a-button @click="execute_gpt">Chat</a-button>
     </a-input-group>
 
-    <a-input-group  class="margin" compact>
+    <a-input-group class="margin" compact>
       <a-input v-model:value="model.command.value" placeholder="waiting for gpt command..." style="width: 80%" />
       <a-button @click="execute_command">Excute</a-button>
     </a-input-group>
@@ -59,13 +69,21 @@ onMounted(() => {
 .read-the-docs {
   color: #888;
 }
+
 .margin {
   margin: 10px;
 }
-.console{
+
+.console {
   width: 100%;
   height: 300px;
   /* border: 1px solid #ccc; */
   overflow: auto;
 }
-</style>
+
+.dropdown-wrapper {
+  display: inline-block;
+  color: gray;
+  margin-right: 5px;
+  text-decoration-color: gray;
+}</style>

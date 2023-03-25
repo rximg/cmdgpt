@@ -1,6 +1,18 @@
 const { contextBridge, ipcRenderer } = require('electron')
 console.log("init preloads.js")
 
+// //cd_dir
+// ipcMain.on('cd_dir', (event, { name }) => {
+//   model.cd_dir(name)
+// });
+// //get_path_list
+// ipcMain.handle('get_path_list', (event, { dir }) => {
+//   return model.get_path_list()
+// });
+// //get_folder_list
+// ipcMain.handle('get_folder_list', (event, { dir }) => {
+//   return model.get_folder_list(dir)
+// });
 contextBridge.exposeInMainWorld('electronAPI', {
   ipcRenderer: ipcRenderer,
   onCommandOutput: (callback) => {
@@ -16,13 +28,22 @@ contextBridge.exposeInMainWorld('electronAPI', {
   executeCommand: (command, cwd) => {
     ipcRenderer.invoke('execute-command', { command, cwd });
   },
-  executeGPT: () => {
-    console.log("executeGPT in render")
-    ipcRenderer.invoke('execute-gpt',{});
+  executeGPT: (data:string) => {
+    return ipcRenderer.invoke('execute-gpt',{input:data});
   },
   updateValues: (values) => {
     ipcRenderer.send('update-values', { values });
+  },
+  changeDir: (name) => {
+    ipcRenderer.send('changeDir', { name });
+  },
+  getPathList: () => {
+    return ipcRenderer.invoke('get_path_list',{});
+  },
+  getFolderList: (dir) => {
+    return ipcRenderer.invoke('get_folder_list',{ dir });
   }
+
 })
 
 function domReady(condition: DocumentReadyState[] = ['complete', 'interactive']) {
@@ -51,7 +72,8 @@ const safeDOM = {
     }
   },
 }
-
+const encoding = document.characterSet;
+console.log(`渲染进程的字符编码是 ${encoding}`);
 /**
  * https://tobiasahlin.com/spinkit
  * https://connoratherton.com/loaders

@@ -10,5 +10,7 @@ import Main from './components/Main.vue'
 </template>
 
 <style>
-
+body, html {
+  overflow: hidden;
+}
 </style>

@@ -7,14 +7,8 @@ import {ConfigHandler} from './config'
 import {Model} from './api'
 // The built directory structure
 //
-// ├─┬ dist-electron
-// │ ├─┬ main
-// │ │ └── index.js    > Electron-Main
-// │ └─┬ preload
-// │   └── index.js    > Preload-Scripts
-// ├─┬ dist
-// │ └── index.html    > Electron-Renderer
 //
+process.env.LANG = 'en_US.UTF-8'
 process.env.DIST_ELECTRON = join(__dirname, '..')
 process.env.DIST = join(process.env.DIST_ELECTRON, '../dist')
 process.env.PUBLIC = process.env.VITE_DEV_SERVER_URL
@@ -31,6 +25,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
   process.exit(0)
 }
+
 // const config_hander = new ConfigHandler()
 // Remove electron security warnings
 // This warning only shows in development mode
@@ -91,20 +86,32 @@ app.whenReady().then(
 
 
 ipcMain.handle('execute-command', (event, { command, cwd }) => {
-  console.log('execute-gpt in main')
-
-  model.execute_command(event,command, cwd)
+  model.execute_command(event,command)
 });
 
-ipcMain.handle('execute-gpt', async (event,) => {
-  // model.execute_command(event,command, cwd)
-  console.log('execute-gpt in main')
-  return await model.execute_gpt()
+ipcMain.handle('execute-gpt', async (event,{input}) => {
+  // const data = iconv.decode(input, 'UTF-8');
+  console.log( "收到",input)
+  return await model.execute_gpt(event,input)
 });
 
 ipcMain.on('update-values', (event, { values }) => {
   model.update_values(values)
 });
+
+//cd_dir
+ipcMain.on('changeDir', (event, { name }) => {
+  model.changeDir(name)
+});
+//get_path_list
+ipcMain.handle('get_path_list', (event, { dir }) => {
+  return model.get_path_list()
+});
+//get_folder_list
+ipcMain.handle('get_folder_list', (event, { dir }) => {
+  return model.get_folder_list(dir)
+});
+
 
 
 // ipcMain.handle('get-config', (event, { key }) => {

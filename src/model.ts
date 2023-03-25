@@ -29,23 +29,34 @@ export class Model {
     // data: Record<string, any> = {}
     prompt: Ref<string> = ref('')
     // openai_api: OpenAI
-    current_dir: Ref<string> = ref('C:\\Users\\kk')
-    //TODO 文件管理器，将路径换成面包屑？
+    // current_dir: Ref<string> = ref('C:\\Users\\kk')
+    path_list: string[] = []
     window: any
 
     constructor(
         window: any,
     ){
         this.window = window
+        this.path_list = reactive([])
+        this.window.electronAPI.getPathList().then((path_list:string[]) => {
+            for (let i = 0; i < path_list.length; i++) {
+                this.path_list.push(path_list[i])
+            }
+            console.log('path_list',this.path_list)
+        })
     }
 
     async execute_command() {
+        const dir = this.path_list.join('/')
         await this.window.electronAPI.executeCommand(
-            this.command.value, this.current_dir.value);
+            this.command.value, dir);
     }
 
     async execute_gpt() {
-        this.command.value = await this.window.electronAPI.executeGPT();
+        this.command.value = await this.window.electronAPI.executeGPT(
+            this.prompt.value
+        );
+        console.log('execute_gpt',this.command.value)
     }
 
     async update_values(values: Record<string, any>) {
@@ -59,7 +70,26 @@ export class Model {
           });
         this.window.electronAPI.onCommandExit(exitCode => {
             // 处理命令执行完毕的逻辑
-            console.log('exitCode', exitCode)
+            this.outputs.push("\n")
           });
     }
+
+    async change_dir(dir:string){
+        console.log('change_dir',dir)
+        await this.window.electronAPI.changeDir(dir);
+        // this.current_dir.value = dir
+        const path_list =  await this.window.electronAPI.getPathList()
+        console.log('get path_list',path_list)
+        this.path_list.splice(0,this.path_list.length)
+        console.log('clean path_list',this.path_list)
+        for (let i = 0; i < path_list.length; i++) {
+            this.path_list.push(path_list[i])
+        }
+        console.log('path_list',this.path_list)
+    }
+
+    async oslistdir(dir:string){
+        return await this.window.electronAPI.getFolderList(dir);
+    }
 }
+

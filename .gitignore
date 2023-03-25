@@ -31,3 +31,5 @@ pnpm-lock.yaml
 yarn.lock
 .vscode/extensions.json
 *.code-workspace
+get.js
+get.py
