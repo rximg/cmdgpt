@@ -2,8 +2,6 @@
 import { Model } from '../model'
 import { onMounted, onUpdated, ref, Ref, computed, reactive, watch } from 'vue';
 import { DownOutlined, FormOutlined, RetweetOutlined, FolderOpenOutlined } from '@ant-design/icons-vue';
-//TODO 将enter 加入到按钮的触发中。
-//初始化组件的入参
 const {model} = defineProps({ model: {
     type:Model,
     required: true
@@ -120,7 +118,7 @@ const cd_into_subfolder = (name:string) => {
         <div class="dropdown-wrapper">{{ model.path_list[0] }}</div>
         <div  v-for="(name, i) in model.path_list.slice(1, model.path_list.length)" :key="i" class="dropdown-wrapper">
           <a-dropdown  @click.prevent @mouseenter="loadMenuItems(i)">
-            <a>{{ name }}
+            <a  style="color: gray">{{ name }}
               <DownOutlined />
             </a>
             <template #overlay>
@@ -134,7 +132,7 @@ const cd_into_subfolder = (name:string) => {
         </div>
         <div class="dropdown-wrapper">
             <a-dropdown @click.prevent @mouseenter="load_folders">
-            <a>
+            <a  style="color: gray">
                 <FolderOpenOutlined />
             </a>
             <template #overlay>
